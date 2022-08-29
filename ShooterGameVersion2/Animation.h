@@ -12,24 +12,27 @@ public:
 	sf::Texture currentImage;
 	sf::Vector2i textureSize = sf::Vector2i(50,50);
 	sf::Vector2i texturePos = sf::Vector2i(0, 0);
-	Animation(sf::Texture currentImage,int count) {
-		this->currentImage = currentImage;
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="spriteSheet">Spritesheet must be one line.</param>
+	/// <param name="count">Total count of the images in the sprite sheet.</param>
+	Animation(sf::Texture spriteSheet,int count) {
+		this->currentImage = spriteSheet;
 		this->count = count-1;
-		spriteSize = sf::Vector2u(currentImage.getSize().x/count, currentImage.getSize().y);
+		spriteSize = sf::Vector2u(spriteSheet.getSize().x/count, spriteSheet.getSize().y);
 	}
 	Animation() {
 
 	}
-	void Animate() {
-		if (currentImageCount < count) {
-			currentImageCount++;
-		}
-		else {
-			currentImageCount = 0;
-		}
-	}
-	void Reset() {
-		currentImageCount = 0;
-	}
+	/// <summary>
+	/// Iterates the animation forward 1 frame.
+	/// </summary>
+	void Animate();
+	/// <summary>
+	/// Resets the animation.
+	/// </summary>
+	void Reset();
+
 };
 

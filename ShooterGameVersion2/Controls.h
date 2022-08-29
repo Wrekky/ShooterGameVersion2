@@ -8,8 +8,18 @@ public:
 	sf::Keyboard::Key upKey = sf::Keyboard::W;
 	sf::Keyboard::Key downKey= sf::Keyboard::S;
 	sf::Keyboard::Key jumpKey = sf::Keyboard::Space;
+	bool left = false;
+	bool right = false;
+	bool up = false;
+	bool down = false;
+	bool jump = false;
 	//constructors:
 	Controls() {
+		this->leftKey = sf::Keyboard::Key::A;
+		this->rightKey = sf::Keyboard::Key::D;
+		this->upKey = sf::Keyboard::Key::W;
+		this->downKey = sf::Keyboard::Key::S;
+		this->jumpKey = sf::Keyboard::Key::Space;
 	}
 	Controls(sf::Keyboard::Key leftKey, sf::Keyboard::Key rightKey, sf::Keyboard::Key upKey, sf::Keyboard::Key downKey, sf::Keyboard::Key jumpKey) {
 		this->leftKey = leftKey;
@@ -18,14 +28,11 @@ public:
 		this->downKey = downKey;
 		this->jumpKey = jumpKey;
 	}
-	bool left;
-	bool right;
-	bool up;
-	bool down;
-	bool jump;
 
 
-	//refresh controls function, call this once per frame.
+	/// <summary>
+	/// Refreshes controls, call this once per frame.
+	/// </summary>
 	void Refresh();
 };
 

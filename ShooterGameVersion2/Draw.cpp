@@ -6,7 +6,7 @@ std::vector<GameObject*> Draw::SortByLayer(std::vector<GameObject*> gameObjects)
 		int layer = test[x]->layer;
 	}
 	std::sort(test.begin(), test.end(),
-		[](GameObject* struct1, GameObject* struct2)//lambda
+		[](GameObject* struct1, GameObject* struct2)
 		{
 			return (struct1->layer < struct2->layer);
 		}
