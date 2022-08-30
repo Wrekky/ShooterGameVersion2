@@ -7,56 +7,68 @@
 #include "Draw.h"
 #include "PhysicsWorld.h"
 #include "Camera.h"
-//TODO LIST UPDATED:::
+//TODO LIST UPDATED:
 // 
-// Make running animation based on velocity.
-// Animation resets when velocity is equal to zero.
-// Jumping
-// Jumping animationdfwawedsAESAS
+// Code cleaning --- Remove level editor.
+// Code cleaning --- Remove 2nd player.
+// Code cleaning --- Clean main area into the 3 functions. (Doing)
+// Add jumping function.
+// Add jumping animation
+// Code cleaning --- remove unnecessary comments.
 // 
+// Dunno after that. Gun mechanics, scoring, enemies. Try to keep code clean when adding these.
 // 
 // If i want to change how i do things, make a gameworld object that you do GameObject.Add(GameObject(properties))
-// 
 // 
 // Fix level editor problems.
 // Level editor problems: Creates multiple game objects sometimes. (i think)
 // 
-// 
 // ADD SPRITES
 // ADD ANIMATION CLASS
 // DO GAME
-//
-//file structure is all lowercase.
-// 
-//Todo list:
-// +SORT DRAW VECTOR BY GAMEOBJECTS LAYER ATTRIBUTE. Either do my own sort function or use someone elses. DONE
-//Physics -> Make 2 gameobjects, a floor and a player. Fix if i did something wrong. DONE
-// Add physics -> Physics2D class. DONE
-// Collisions on physics will be ran for every single pixel run. DONE
-// Either reset velocity to zero OR reverse velocity for the side of the wall you hit and -90% of its value. DONE kinda
-// 
-// You press e, it brings up a grid 
-// 
-// 
-// Static sprites comments and seperate functions into the cpp files instead of having them all be in .h files. (never gonna be done)
-// 
-// Player mechanics.
-// Animation -> Just make a running animation.
-// Attatch running animation to players movement. Try to base it on current players speed. do mario stuff.
-// enemies
-// weapon system
-// enemies
-//Score system
-//Its just gonna be a game that spawns flying enemies while you fight on a singular screen OR a kind of wide screen. dunno yet.
+
+
+/// <summary>
+/// Creates a wall at a given location. Must be called by the IntializeWorld() function.
+/// </summary>
+/// <returns></returns>
+GameObject CreateWall(sf::Vector2f position, sf::Vector2f size) {
+    GameObject wall(Box2D(position, size), "Floor", 1, Physics2D(sf::Vector2f(0, 0), false));
+    return wall;
+}
+/// <summary>
+/// Initializes default locations of all gameobjects except for the players.
+/// Intialize the world, then add the players to it.
+/// </summary>
+/// <returns>The current level.</returns>
+std::vector<GameObject> InitializeWorld() {
+    std::vector<GameObject> world;
+    world.reserve(1000);
+    world.push_back(CreateWall(sf::Vector2f(0, 720), sf::Vector2f(720, 50)));
+    world.push_back(CreateWall(sf::Vector2f(0, 0), sf::Vector2f(720, 50)));
+    world.push_back(CreateWall(sf::Vector2f(100, 300), sf::Vector2f(200, 200)));
+    return world;
+}
+
+/// <summary>
+/// Jumping function for the player. Will be called by PlayerMovement()
+/// </summary>
+void PlayerJump(GameObject& player) {
+
+}
+/// <summary>
+/// Handles player movement as well as flipping of animations.
+/// </summary>
+void PlayerMovement(GameObject& player) {
+
+}
+
+
 int main()
 {
+    //Texture setup. Think about breaking this up into methods.
     std::string playerJump = "animations/playerWalk/playerJumpSheet.png";
     std::string playerWalk = "animations/playerWalk/playerWalkSheet.png";
-    //Animation playerWalk;
-    //Animation playerIdle;
-    //Animation playerJump;
-
-    //grabbing image.
     sf::Texture playerWalkImage;
    
     if (playerWalkImage.loadFromFile(playerWalk)) {
@@ -72,48 +84,50 @@ int main()
         std::cout << "player jump image not loaded" << std::endl;
     }
     playerWalkImage.setSmooth(true);
+
+
+
+    //all gameobjects get pushed into gameObjectStorage, where they are stored.
+    //Gameobjects are then sent out as references to the gameobjects vector which is used by every function.
+    //You cant sort gameObject storage so I cannot delete new objects unless a new vector is used for objects that will be deleted.
     std::vector<GameObject> gameObjectStorage;
-    //Reserving gameobject storage space.
-    gameObjectStorage.reserve(1000);
-    std::vector<GameObject*> gameObjects;//should be sorted by gameobjects int property every now and then. this should also be a pointer now...
-    sf::RenderWindow window(sf::VideoMode(800, 400), "");
+    gameObjectStorage = InitializeWorld();
+    std::vector<GameObject*> gameObjects;
+    for (int x = 0; x < gameObjectStorage.size(); x++) {
+        gameObjects.push_back(&gameObjectStorage[x]);
+    }
+
+    //////Player Objects
+    GameObject player(Box2D(sf::Vector2f(100, 100), sf::Vector2f(50, 100)), "Player", 2, Physics2D(sf::Vector2f(50 + 5, 100 + 5)));
+    player.animation = Animation(playerWalkImage, 4);
+    player.animation.framerate = 12;
+    player.debugDraw = false;
+    gameObjects.push_back(&player);
+    GameObject player2(Box2D(sf::Vector2f(500, 500), sf::Vector2f(10, 10)), "Player2", 2, Physics2D(sf::Vector2f(50 + 5, 100 + 5)));
+    gameObjects.push_back(&player2);
+    
+    //Sorting all objects. 
+    int gameObjectsSize = gameObjects.size();
+    gameObjects = Draw::SortByLayer(gameObjects);
+
+    //Other game settings
+    PhysicsWorld world;
+    Camera cam(sf::Vector2f(0, 0));
+
+    //Controls
     Controls p1Controls;
     Controls p2Controls(sf::Keyboard::Left, sf::Keyboard::Right, sf::Keyboard::Up, sf::Keyboard::Down, sf::Keyboard::Space);
-    
+
+    //Window and framerate settings
+    sf::RenderWindow window(sf::VideoMode(800, 400), "");
     float framerate = 60;//60 fps.
     float convertedFramerate = (1 / framerate) * 1000;//bad but fine...
     sf::Clock clock;
     
-    //////GAME OBJECTS
-    GameObject player(Box2D(sf::Vector2f(100, 100), sf::Vector2f(50, 100)),"Player",2,Physics2D(sf::Vector2f(50 + 5,100 + 5)));//id like to have gameObjects be a const or something I dont have to define in the class and can instead reference
-    player.animation = Animation(playerWalkImage,4);
-    player.animation.framerate = 12;
-    player.debugDraw = false;
-    
-    GameObject player2(Box2D(sf::Vector2f(500, 500), sf::Vector2f(10, 10)), "Player2", 2, Physics2D(sf::Vector2f(50 + 5, 100 + 5)));//id like to have gameObjects be a const or something I dont have to define in the class and can instead reference
-    GameObject floor(Box2D(sf::Vector2f(50, window.getSize().y-50), sf::Vector2f(window.getSize().x-100, 50)), "Floor",1,Physics2D(sf::Vector2f(0+window.getSize().x/2, (window.getSize().y-50)+25),false));
-    GameObject roof(Box2D(sf::Vector2f(50, 0), sf::Vector2f(window.getSize().x - 100, 50)), "Floor", 1, Physics2D(sf::Vector2f(0 + window.getSize().x / 2, (window.getSize().y - 50) + 25), false));
-    GameObject lWall(Box2D(sf::Vector2f(0, 0), sf::Vector2f(50, window.getSize().y)), "Floor", 1, Physics2D(sf::Vector2f(0 + window.getSize().x / 2, (window.getSize().y - 50) + 25), false));
-    GameObject rWall(Box2D(sf::Vector2f(window.getSize().x-50, 0), sf::Vector2f(50, window.getSize().y)), "Floor", 1, Physics2D(sf::Vector2f(0 + window.getSize().x / 2, (window.getSize().y - 50) + 25), false));
-    gameObjects.push_back(&player);
-    gameObjects.push_back(&player2);
-    gameObjects.push_back(&lWall);
-    gameObjects.push_back(&rWall);
-    gameObjects.push_back(&floor);
-    gameObjects.push_back(&roof);
-
-    //Why isnt this getting called?
-    //how do i want to do drawing? --> every game object either has a reference to a layer vector OR a simple int? if its an int i'd have to iterate every time... 
-    //When a game object gets created they get added to a public game object list. So in the constructor I wanna add a add to list function...
-    int gameObjectsSize = gameObjects.size();
-    gameObjects = Draw::SortByLayer(gameObjects);
-    PhysicsWorld world;
-    bool editMode = false;
-    //box creation stuff.
+    //Old edit mode stuff. Remove this.
     sf::Vector2f topLeft = sf::Vector2f(-300,-300);
     sf::Vector2f bottomRight = sf::Vector2f(-300, -300);
-
-    Camera cam(sf::Vector2f(0, 0));
+    bool editMode = false;
     
     while (window.isOpen())
     {
@@ -248,6 +262,7 @@ int main()
                // draw.Draw();
                 cam.SetPos(player.box2d.position + sf::Vector2f(-350,-200));
                 Draw::DrawObjects(window, gameObjects,cam);
+                
             }
         }
 
@@ -255,4 +270,5 @@ int main()
     }
 
     return 0;
+
 }
