@@ -10,6 +10,7 @@ public:
 	sf::Vector2f center;
 	float mass = 0;
 	float bounciness = 0;
+	float gravityRatio = 1.0f;
 	Physics2D(sf::Vector2f velocity, sf::Vector2f center, float mass, float bounciness) {
 		this->mass = mass;
 		this->bounciness = bounciness;

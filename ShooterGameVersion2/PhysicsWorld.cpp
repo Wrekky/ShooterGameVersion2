@@ -4,7 +4,7 @@ std::vector<GameObject*> PhysicsWorld::Update(std::vector<GameObject*> allObject
 
 		Physics2D p2d = allObjects[x]->physics;
 		if (p2d.enabled) {
-			//allObjects[x]->physics.velocity.y += gravity;
+			allObjects[x]->physics.velocity.y += gravity * allObjects[x]->physics.gravityRatio;
 			//add gravity to velocity.
 			//for every bit of velocity in either direction, add 1 to the objects current position and center.
 			//If a collision occurs, stop that bit of velocity. Just make it zero for now.

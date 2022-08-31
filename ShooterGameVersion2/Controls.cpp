@@ -18,7 +18,7 @@ void Controls::Refresh() {
 	if (sf::Keyboard::isKeyPressed(downKey)) {
 		down = true;
 	}
-	if (sf::Keyboard::isKeyPressed(jumpKey)) {
+	if (sf::Keyboard::isKeyPressed(jumpKey) && jump == false) {
 		jump = true;
 	}
 }

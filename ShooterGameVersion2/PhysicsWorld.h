@@ -7,7 +7,7 @@ class PhysicsWorld
 {
 public:
 	//Gravity multiplier, higher multiplier = heavier objects.
-	float gravity = 0.2f;
+	float gravity = 1.0f;
 	//Applies object velocity and adjusts collisions accordingly.
 	std::vector<GameObject*> Update(std::vector<GameObject*> allObjects);
 };

@@ -14,7 +14,7 @@ public:
 	std::string type = "";
 	int layer = 0;
 	bool debugDraw = true;
-
+	bool onGround = false;
 	//constructors
 	GameObject(Box2D box2d,Animation animation,std::string type,Physics2D physics) {
 		this->box2d = box2d;

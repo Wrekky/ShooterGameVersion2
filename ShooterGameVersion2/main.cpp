@@ -9,24 +9,13 @@
 #include "Camera.h"
 //TODO LIST UPDATED:
 // 
-// Code cleaning --- Remove level editor.
-// Code cleaning --- Remove 2nd player.
-// Code cleaning --- Clean main area into the 3 functions. (Doing)
-// Add jumping function.
+// Add friction/a speed limit on x movement.
 // Add jumping animation
+// Create player class.
 // Code cleaning --- remove unnecessary comments.
 // 
 // Dunno after that. Gun mechanics, scoring, enemies. Try to keep code clean when adding these.
 // 
-// If i want to change how i do things, make a gameworld object that you do GameObject.Add(GameObject(properties))
-// 
-// Fix level editor problems.
-// Level editor problems: Creates multiple game objects sometimes. (i think)
-// 
-// ADD SPRITES
-// ADD ANIMATION CLASS
-// DO GAME
-
 
 /// <summary>
 /// Creates a wall at a given location. Must be called by the IntializeWorld() function.
@@ -49,40 +38,80 @@ std::vector<GameObject> InitializeWorld() {
     world.push_back(CreateWall(sf::Vector2f(100, 300), sf::Vector2f(200, 200)));
     return world;
 }
-
+/// <summary>
+/// Checks if an object is on the ground or not.
+/// </summary>
+/// <param name="obj">The object to be checked.</param>
+/// <param name="objects">All gameobjects.</param>
+/// <returns>True if on ground.</returns>
+bool OnGround(GameObject obj, std::vector<GameObject*> objects) {
+    Box2D box;
+    box = obj.box2d;
+    box.position = sf::Vector2f(box.position.x + 1, box.position.y + box.size.y + 1);
+    box.size = sf::Vector2f(box.size.x-2,2);
+    for (int i = 0; i < objects.size(); i++) {
+        if (Collision::AABB(box,objects[i]->box2d)) {
+            return true;
+        }
+    }
+    return false;
+}
 /// <summary>
 /// Jumping function for the player. Will be called by PlayerMovement()
 /// </summary>
 void PlayerJump(GameObject& player) {
-
+    player.physics.velocity.y = -10;
 }
 /// <summary>
 /// Handles player movement as well as player animations.
 /// </summary>
 void PlayerMovement(GameObject& player,Controls controls) {
+    float xSpeedCap = 6.0f;
+    float speed = 1.0f;
+    float friction = 0.5f;
+    if (!player.onGround) {
+        friction = 0.1f;
+        speed = 0.5f;
+    }
     controls.Refresh();
-
-    if (controls.left) {
+    if (controls.left && player.physics.velocity.x > -xSpeedCap) {
         if (player.physics.velocity.x > 0 && player.animation.flipped != false) {
             player.animation.Reset();
         }
-        player.physics.velocity.x -= 1;
+        player.physics.velocity.x -= speed;
         player.animation.flipped = false;
     }
-    if (controls.right) {
+    if (controls.right && player.physics.velocity.x < xSpeedCap) {
         if (player.physics.velocity.x < 0 && player.animation.flipped != true) {
             player.animation.Reset();
         }
-        player.physics.velocity.x += 1;
+        player.physics.velocity.x += speed;
 
         player.animation.flipped = true;
-    }
-    if (controls.down) {
 
-        player.physics.velocity.y += 1;
     }
-    if (controls.up) {
-        player.physics.velocity.y -= 1;
+
+    //psuedo friction for the player.
+    if (!controls.right && !controls.left) {
+        if(std::abs(player.physics.velocity.x) < 0.55f) {
+            player.physics.velocity.x = 0;
+        }
+        else if (player.physics.velocity.x > 0) {
+            player.physics.velocity.x -= friction;
+        }
+        else if (player.physics.velocity.x < 0) {
+            player.physics.velocity.x += friction;
+        }
+    }
+    if (controls.jump && player.onGround) {
+        PlayerJump(player);
+    }
+    //If you hold space while jumping you should have a longer arc.
+    if (controls.jump && player.physics.velocity.y < 0) {
+        player.physics.gravityRatio = 0.3f;
+    }
+    else {
+        player.physics.gravityRatio = 1.0f;
     }
     player.animation.framerate = std::abs((player.physics.velocity.x)) * 2;
 }
@@ -113,7 +142,7 @@ int main()
 
     //all gameobjects get pushed into gameObjectStorage, where they are stored.
     //Gameobjects are then sent out as references to the gameobjects vector which is used by every function.
-    //You cant sort gameObject storage so I cannot delete new objects unless a new vector is used for objects that will be deleted.
+    // Can't sort gameObjectStorage.  Can't delete new objects unless a new vector is used for temp objects.
     std::vector<GameObject> gameObjectStorage;
     gameObjectStorage = InitializeWorld();
     std::vector<GameObject> tempObjectStorage;
@@ -155,6 +184,7 @@ int main()
         else {
             //
             if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
+                player.onGround = OnGround(player, gameObjects);
                 clock.restart();
                 PlayerMovement(player, p1Controls);
                 gameObjects = world.Update(gameObjects);
