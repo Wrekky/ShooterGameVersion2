@@ -9,8 +9,11 @@
 #include "Camera.h"
 //TODO LIST UPDATED:
 // 
-// Add friction/a speed limit on x movement.
-// Add jumping animation
+// Add a crosshair 
+// Add a UI bar.
+// Create player HP.
+// Add an enemy
+// Add a score system for eveyr enemy killed.
 // Create player class.
 // Code cleaning --- remove unnecessary comments.
 // 
@@ -119,25 +122,24 @@ void PlayerMovement(GameObject& player,Controls controls) {
 
 int main()
 {
-    //Texture setup. Think about breaking this up into methods.
-    std::string playerJump = "animations/playerWalk/playerJumpSheet.png";
+    std::string crosshair = "images/crosshair.png";
     std::string playerWalk = "animations/playerWalk/playerWalkSheet.png";
     sf::Texture playerWalkImage;
-   
+    sf::Texture crosshairText;
     if (playerWalkImage.loadFromFile(playerWalk)) {
         std::cout << "player walk image loaded" << std::endl;
     }
     else {
         std::cout << "player walk image not loaded" << std::endl;
     }
-    if (playerWalkImage.loadFromFile(playerJump)) {
-        std::cout << "player jump image loaded" << std::endl;
+    if (crosshairText.loadFromFile(crosshair)) {
+        std::cout << "Crosshair loaded successfully." << std::endl;
     }
     else {
-        std::cout << "player jump image not loaded" << std::endl;
+        std::cout << "Crosshair not loaded!!" << std::endl;
     }
     playerWalkImage.setSmooth(true);
-
+    crosshairText.setSmooth(true);
 
 
     //all gameobjects get pushed into gameObjectStorage, where they are stored.
@@ -150,14 +152,16 @@ int main()
     for (int x = 0; x < gameObjectStorage.size(); x++) {
         gameObjects.push_back(&gameObjectStorage[x]);
     }
-
-    //////Player Objects
+    GameObject crosshairObj(Box2D(sf::Vector2f(100, 100), sf::Vector2f(50, 50)), "crosshair", 3);
+    crosshairObj.animation = Animation(crosshairText,1);
+    crosshairObj.physics.enabled = false;
+    crosshairObj.physics.collisionsEnabled = false;
     GameObject player(Box2D(sf::Vector2f(100, 100), sf::Vector2f(50, 100)), "Player", 2, Physics2D(sf::Vector2f(50 + 5, 100 + 5)));
     player.animation = Animation(playerWalkImage, 4);
     player.animation.framerate = 60;
     player.debugDraw = false;
     gameObjects.push_back(&player);
-    
+    gameObjects.push_back(&crosshairObj);
     //Sorting all objects. 
     int gameObjectsSize = gameObjects.size();
     gameObjects = Draw::SortByLayer(gameObjects);

@@ -22,6 +22,14 @@ public:
 		this->type = type;
 		this->physics = physics;
 	}
+	GameObject(Box2D box2d, std::string type, int layer) {
+		this->box2d = box2d;
+		this->animation = animation;
+		this->type = type;
+		this->layer = layer;
+		this->physics = Physics2D();
+		physics.enabled = false;
+	}
 	GameObject(Box2D box2d, std::string type,Physics2D physics) {
 		this->box2d = box2d;
 		this->type = type;

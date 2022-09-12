@@ -6,6 +6,7 @@ class Physics2D
 	//Needs to include objects mass, bounciness, velocity.
 public:
 	bool enabled = true;
+	bool collisionsEnabled = true;
 	sf::Vector2f velocity;
 	sf::Vector2f center;
 	float mass = 0;

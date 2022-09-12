@@ -12,6 +12,7 @@ public:
 	sf::Texture currentImage;
 	sf::Vector2i textureSize = sf::Vector2i(50,50);
 	sf::Vector2i texturePos = sf::Vector2i(0, 0);
+	bool singleFrame = false;
 	/// <summary>
 	/// 
 	/// </summary>

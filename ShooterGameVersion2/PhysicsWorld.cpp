@@ -21,7 +21,7 @@ std::vector<GameObject*> PhysicsWorld::Update(std::vector<GameObject*> allObject
 				//this should never be getting hit. Collision should never happen. Only adding xs... wait a collision is always happening?
 				bool collision = false;
 				for (int i = 0; i < allObjects.size(); i++) {
-					if (i != x) {
+					if (i != x && allObjects[x]->physics.collisionsEnabled && allObjects[i]->physics.collisionsEnabled) {
 						if (Collision::AABB(allObjects[x]->box2d, allObjects[i]->box2d)) {
 							allObjects[x]->box2d.isColliding = true;
 							//if collision is to the left.
@@ -42,7 +42,7 @@ std::vector<GameObject*> PhysicsWorld::Update(std::vector<GameObject*> allObject
 				allObjects[x]->box2d.position = sf::Vector2f(allObjects[x]->box2d.position.x, allObjects[x]->box2d.position.y + velocityRatio.y);
 				//checking for collision
 				for (int i = 0; i < allObjects.size(); i++) {
-					if (i != x) {
+					if (i != x && allObjects[x]->physics.collisionsEnabled && allObjects[i]->physics.collisionsEnabled) {
 						if (Collision::AABB(allObjects[x]->box2d, allObjects[i]->box2d)) {
 							allObjects[x]->box2d.isColliding = true;
 							//if collision is to the up.
