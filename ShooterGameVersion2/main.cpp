@@ -122,6 +122,7 @@ void PlayerMovement(GameObject& player,Controls controls) {
 
 int main()
 {
+    bool close = false;
     std::string crosshair = "images/crosshair.png";
     std::string playerWalk = "animations/playerWalk/playerWalkSheet.png";
     sf::Texture playerWalkImage;
@@ -168,34 +169,51 @@ int main()
 
     //Other game settings
     PhysicsWorld world;
-    Camera cam(sf::Vector2f(0, 0));
+   
 
     //Controls
     Controls p1Controls;
 
     //Window and framerate settings
-    sf::RenderWindow window(sf::VideoMode(800, 400), "");
+    sf::RenderWindow window(sf::VideoMode(1200,800), "");
+    Camera cam(player.box2d.position);
+    window.requestFocus();
+    bool focus = window.hasFocus();
     float framerate = 60;//60 fps.
     float convertedFramerate = (1 / framerate) * 1000;//bad but fine...
-    sf::Clock clock;
-    while (window.isOpen())
-    {
-        //if a new gameobject is added, all layers should be resorted... (Pretty big perf cost if a lot of objects are being added at once. Maybe change)
-        if (gameObjectsSize > gameObjects.size()) {
-            gameObjectsSize = gameObjects.size();
-            gameObjects = Draw::SortByLayer(gameObjects);
-        }
-        else {
-            //
-            if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
-                player.onGround = OnGround(player, gameObjects);
-                clock.restart();
-                PlayerMovement(player, p1Controls);
-                gameObjects = world.Update(gameObjects);
-                cam.SetPos(player.box2d.position + sf::Vector2f(-350, -200));
-                Draw::DrawObjects(window, gameObjects, cam);
+	sf::Clock clock;
+	while (!close) {
+		while (window.isOpen())
+		{
+            
+            while (focus) {
+                focus = window.hasFocus();
+                //if a new gameobject is added, all layers should be resorted... (Pretty big perf cost if a lot of objects are being added at once. Maybe change)
+                if (gameObjectsSize > gameObjects.size()) {
+                    gameObjectsSize = gameObjects.size();
+                    gameObjects = Draw::SortByLayer(gameObjects);
+                }
+                else {
+                    //
+                    if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
+                        player.onGround = OnGround(player, gameObjects);
+                        clock.restart();
+                        PlayerMovement(player, p1Controls);
+                        gameObjects = world.Update(gameObjects);
+                        cam.SetPos(player.box2d.position - sf::Vector2f((window.getSize().x) / 2 - player.box2d.size.x / 2, (window.getSize().y) / 2 - player.box2d.size.y / 2));
+                        Draw::DrawObjects(window, gameObjects, cam);
+                    }
+                }
             }
-        }
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed) {
+                    close = true;
+                    window.close();
+                }
+            }
+		}
+
     }
 
     return 0;
