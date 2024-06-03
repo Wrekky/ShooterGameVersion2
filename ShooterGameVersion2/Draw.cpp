@@ -74,7 +74,10 @@ void Draw::DrawObjects(sf::RenderWindow& window, std::vector<GameObject*> gameOb
 				shape.setTextureRect(sf::IntRect(gameObjects[x]->animation.texturePos, gameObjects[x]->animation.textureSize));
 				gameObjects[x]->animation.currentFrame = current;
 			}
-			shape.setPosition(shape.getPosition() - cam.GetPos());
+			if (gameObjects[x]->type != "ui") {
+				shape.setPosition(shape.getPosition() - cam.GetPos());
+			}
+			
 			window.draw(shape);
 			//if animations are added i guess...
 		}

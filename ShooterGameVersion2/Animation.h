@@ -20,8 +20,8 @@ public:
 	/// <param name="count">Total count of the images in the sprite sheet.</param>
 	Animation(sf::Texture spriteSheet,int count) {
 		this->currentImage = spriteSheet;
-		this->count = count-1;
 		spriteSize = sf::Vector2u(spriteSheet.getSize().x/count, spriteSheet.getSize().y);
+		this->count = count - 1;
 	}
 	Animation() {
 
