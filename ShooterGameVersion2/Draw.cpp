@@ -21,6 +21,7 @@ void Draw::DrawObjects(sf::RenderWindow& window, std::vector<GameObject*> gameOb
 			//generating draw shape.
 			sf::RectangleShape shape = sf::RectangleShape(gameObjects[x]->box2d.size);
 			shape.setPosition(gameObjects[x]->box2d.position);
+			shape.setRotation(gameObjects[x]->box2d.rotation);
 			if (gameObjects[x]->box2d.isColliding) {
 				shape.setFillColor(sf::Color::Green);
 			}
@@ -43,6 +44,7 @@ void Draw::DrawObjects(sf::RenderWindow& window, std::vector<GameObject*> gameOb
 			//generating draw shape.
 			sf::RectangleShape shape = sf::RectangleShape(gameObjects[x]->box2d.size);
 			shape.setPosition(gameObjects[x]->box2d.position);
+			shape.setRotation(gameObjects[x]->box2d.rotation);
 			shape.setTexture(&gameObjects[x]->animation.currentImage);
 			if (gameObjects[x]->animation.flipped) {
 				shape.setScale(-1.0, 1.0);
@@ -77,7 +79,7 @@ void Draw::DrawObjects(sf::RenderWindow& window, std::vector<GameObject*> gameOb
 			if (gameObjects[x]->type != "ui") {
 				shape.setPosition(shape.getPosition() - cam.GetPos());
 			}
-			
+
 			window.draw(shape);
 			//if animations are added i guess...
 		}

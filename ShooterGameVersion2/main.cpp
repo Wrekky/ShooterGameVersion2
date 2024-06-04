@@ -1,4 +1,5 @@
 
+#define _USE_MATH_DEFINES
 #include <SFML/Graphics.hpp>
 #include "Controls.h"
 #include "Collision.h"
@@ -7,6 +8,7 @@
 #include "Draw.h"
 #include "PhysicsWorld.h"
 #include "Camera.h"
+#include <cmath>
 //TODO LIST UPDATED:
 // 
 // Major refactoring. Split everything into classes properly.
@@ -121,7 +123,23 @@ void PlayerMovement(GameObject& player,Controls controls) {
     }
     player.animation.framerate = std::abs((player.physics.velocity.x)) * 2;
 }
+float LookAt(sf::Vector2f looking, sf::Vector2f lookingAt, float offset) {
+    //sets rotation towards another object.
+    sf::Vector2f a = looking;
+    sf::Vector2f b = lookingAt;
 
+    float xDiff = b.x - a.x;
+    float yDiff = b.y - a.y;
+
+    //caluclate angle in radians.
+    float radianAngle = atan2f(yDiff, xDiff);
+
+    float angleDegrees = radianAngle * 180 / M_PI;
+
+    angleDegrees + offset;
+
+    return angleDegrees;
+}
 
 int main()
 {
@@ -212,6 +230,9 @@ int main()
                 //Any camera movement needs to apply to the crosshair position.
                 crosshairObj.box2d.position = mousePos;
                 focus = window.hasFocus();
+                //set ak47 to look at crosshair.
+                weaponObj.box2d.position = player.box2d.position;
+                weaponObj.box2d.rotation = LookAt(weaponObj.box2d.position, crosshairObj.box2d.position + cam.GetPos(), 0); // since crosshair is a ui object, add camera position to convert to worldspace
                 //if a new gameobject is added, all layers will be resorted.
                 if (gameObjectsSize > gameObjects.size()) {
                     gameObjectsSize = gameObjects.size();
