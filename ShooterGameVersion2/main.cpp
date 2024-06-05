@@ -123,6 +123,14 @@ void PlayerMovement(GameObject& player,Controls controls) {
     }
     player.animation.framerate = std::abs((player.physics.velocity.x)) * 2;
 }
+
+/// <summary>
+/// returns the degree to have one object look at another.
+/// </summary>
+/// <param name="looking"></param>
+/// <param name="lookingAt"></param>
+/// <param name="offset"></param>
+/// <returns></returns>
 float LookAt(sf::Vector2f looking, sf::Vector2f lookingAt, float offset) {
     //sets rotation towards another object.
     sf::Vector2f a = looking;
@@ -140,7 +148,13 @@ float LookAt(sf::Vector2f looking, sf::Vector2f lookingAt, float offset) {
 
     return angleDegrees;
 }
-
+/// <summary>
+/// Shoots a bullet game object from 
+/// </summary>
+/// <param name="weapon"></param>
+void Fire(GameObject weapon, entityObjectStorage) {
+    
+}
 int main()
 {
     bool close = false;
@@ -178,7 +192,7 @@ int main()
     // Can't sort gameObjectStorage.  Can't delete new objects unless a new vector is used for temp objects.
     std::vector<GameObject> gameObjectStorage;
     gameObjectStorage = InitializeWorld();
-    std::vector<GameObject> tempObjectStorage;
+    std::vector<GameObject> entityObjectStorage;
     std::vector<GameObject*> gameObjects;
     for (int x = 0; x < gameObjectStorage.size(); x++) {
         gameObjects.push_back(&gameObjectStorage[x]);
@@ -234,25 +248,23 @@ int main()
                 weaponObj.box2d.position = player.box2d.position;
                 weaponObj.box2d.rotation = LookAt(weaponObj.box2d.position, crosshairObj.box2d.position + cam.GetPos(), 0); // since crosshair is a ui object, add camera position to convert to worldspace
                 //if a new gameobject is added, all layers will be resorted.
-                if (gameObjectsSize > gameObjects.size()) {
-                    gameObjectsSize = gameObjects.size();
-                    gameObjects = Draw::SortByLayer(gameObjects);
-                }
-                else {
-                    if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
-                        sf::Vector2f prevPos = player.box2d.position;
-                        player.onGround = OnGround(player, gameObjects);
-                        clock.restart();
-                        PlayerMovement(player, p1Controls);
-                        gameObjects = world.Update(gameObjects);
-                        //sets camera position to center of the window.
-                        //get movement from camera and add it to the crosshair.
-                        
-                        cam.SetPos(player.box2d.position - sf::Vector2f((window.getSize().x) / 2 - player.box2d.size.x / 2, (window.getSize().y) / 2 - player.box2d.size.y / 2));
+                //remove entities from gameObjects.
+                //Add entities to gameObjects.
 
-                        Draw::DrawObjects(window, gameObjects, cam);
-                    }
-                }
+				if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
+                    gameObjects = Draw::SortByLayer(gameObjects);
+					sf::Vector2f prevPos = player.box2d.position;
+					player.onGround = OnGround(player, gameObjects);
+					clock.restart();
+					PlayerMovement(player, p1Controls);
+					gameObjects = world.Update(gameObjects);
+					//sets camera position to center of the window.
+					//get movement from camera and add it to the crosshair.
+
+					cam.SetPos(player.box2d.position - sf::Vector2f((window.getSize().x) / 2 - player.box2d.size.x / 2, (window.getSize().y) / 2 - player.box2d.size.y / 2));
+
+					Draw::DrawObjects(window, gameObjects, cam);
+				}
             }
             focus = window.hasFocus();
             sf::Event event;
