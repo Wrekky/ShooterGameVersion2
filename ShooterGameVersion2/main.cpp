@@ -148,19 +148,47 @@ float LookAt(sf::Vector2f looking, sf::Vector2f lookingAt, float offset) {
 
     return angleDegrees;
 }
+sf::Vector2f fireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
+    sf::Vector2f direction = dir1 - dir2;
+    //divide by distance of both objects to normalize
+    float absSum = abs(direction.x) + std::abs(direction.y);
+    if (absSum != 0) {
+        return sf::Vector2f(direction.x / absSum, direction.y / absSum);
+    }
+    else {
+        return sf::Vector2f(1, 0);
+    }
+}
 /// <summary>
 /// Shoots a bullet game object from 
 /// </summary>
 /// <param name="weapon"></param>
-void Fire(GameObject weapon, entityObjectStorage) {
-    
+GameObject Fire(GameObject weapon, sf::Vector2f crosshairPosNormalized, float speed) {
+    std::string bulletString = "images/bullets/bullet-basic.png";
+    sf::Texture bulletText;
+    bulletText.loadFromFile(bulletString);
+    bulletText.setSmooth(true);
+    GameObject bullet(Box2D(weapon.box2d.position, sf::Vector2f(10, 10)), "bullet", 3);
+    bullet.animation = Animation(bulletText, 1);
+    bullet.physics.enabled = true;
+    bullet.physics.collisionsEnabled = false;
+    bullet.physics.gravityRatio = 0;
+    bullet.debugDraw = false;
+    bullet.physics.velocity = fireDirection(crosshairPosNormalized, weapon.box2d.position);
+    bullet.physics.velocity = sf::Vector2f(bullet.physics.velocity.x * speed, bullet.physics.velocity.y * speed);
+    return bullet;
 }
+
+
+
 int main()
 {
     bool close = false;
     std::string crosshair = "images/crosshair.png";
     std::string ak47 = "images/weapons/ak47.png";
     std::string playerWalk = "animations/playerWalk/playerWalkSheet.png";
+    std::string bullet = "images/bullets/bullet-basic.png";
+    sf::Texture bulletText;
     sf::Texture playerWalkImage;
     sf::Texture crosshairText;
     sf::Texture ak47Text;
@@ -183,6 +211,7 @@ int main()
     else {
         std::cout << "Weapon not loaded!!" << std::endl;
     }
+
     playerWalkImage.setSmooth(true);
     crosshairText.setSmooth(true);
     ak47Text.setSmooth(true);
@@ -252,18 +281,41 @@ int main()
                 //Add entities to gameObjects.
 
 				if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
-                    gameObjects = Draw::SortByLayer(gameObjects);
-					sf::Vector2f prevPos = player.box2d.position;
-					player.onGround = OnGround(player, gameObjects);
-					clock.restart();
+
+
+                    if (mouse.isButtonPressed(sf::Mouse::Button::Left)) {
+                        //Dunno another way to do this wow :))
+                        std::vector<GameObject*> currentRef;
+                        for (int i = 0; i < entityObjectStorage.size(); i++) {
+                            currentRef.push_back(&entityObjectStorage[i]);
+                        }
+                        entityObjectStorage.push_back(Fire(weaponObj, crosshairObj.box2d.position + cam.GetPos(), 10));
+                        //remove all previous references for entities from gameObjects list.
+                        for (int i = 0; i < currentRef.size(); i++) {
+                            for (int x = 0; x < gameObjects.size(); x++) {
+                                if (currentRef[i] == gameObjects[x]) {
+                                    gameObjects.erase(gameObjects.begin() + x);
+                                }
+                            }
+                        }
+                        for (int i = 0; i < entityObjectStorage.size(); i++) {
+                            gameObjects.push_back(&entityObjectStorage[i]);
+                        }
+                        //gameObjects.push_back(&entityObjectStorage.back());
+                    }
+                    //remove all objects found in entityObjectStorage from gameObjects DUE TO the vector changing position in memory when adding a new object.
+                    player.onGround = OnGround(player, gameObjects);
 					PlayerMovement(player, p1Controls);
 					gameObjects = world.Update(gameObjects);
 					//sets camera position to center of the window.
 					//get movement from camera and add it to the crosshair.
 
 					cam.SetPos(player.box2d.position - sf::Vector2f((window.getSize().x) / 2 - player.box2d.size.x / 2, (window.getSize().y) / 2 - player.box2d.size.y / 2));
-
+                    gameObjects = Draw::SortByLayer(gameObjects);
 					Draw::DrawObjects(window, gameObjects, cam);
+
+
+                    clock.restart();
 				}
             }
             focus = window.hasFocus();
