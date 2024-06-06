@@ -8,6 +8,8 @@
 #include "Draw.h"
 #include "PhysicsWorld.h"
 #include "Camera.h"
+#include "Player.h"
+#include "Utils.h"
 #include <cmath>
 //TODO LIST UPDATED:
 // 
@@ -43,85 +45,6 @@ std::vector<GameObject> InitializeWorld() {
     world.push_back(CreateWall(sf::Vector2f(0, 0), sf::Vector2f(720, 50)));
     world.push_back(CreateWall(sf::Vector2f(100, 300), sf::Vector2f(200, 200)));
     return world;
-}
-/// <summary>
-/// Checks if an object is on the ground or not.
-/// </summary>
-/// <param name="obj">The object to be checked.</param>
-/// <param name="objects">All gameobjects.</param>
-/// <returns>True if on ground.</returns>
-bool OnGround(GameObject obj, std::vector<GameObject*> objects) {
-    Box2D box;
-    box = obj.box2d;
-    box.position = sf::Vector2f(box.position.x + 1, box.position.y + box.size.y + 1);
-    box.size = sf::Vector2f(box.size.x-2,2);
-    for (int i = 0; i < objects.size(); i++) {
-        if (objects[i]->physics.collisionsEnabled) {
-            if (Collision::AABB(box, objects[i]->box2d)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-/// <summary>
-/// Jumping function for the player. Will be called by PlayerMovement()
-/// </summary>
-void PlayerJump(GameObject& player) {
-    player.physics.velocity.y = -10;
-}
-/// <summary>
-/// Handles player movement as well as player animations.
-/// </summary>
-void PlayerMovement(GameObject& player,Controls controls) {
-    float xSpeedCap = 6.0f;
-    float speed = 1.0f;
-    float friction = 0.5f;
-    if (!player.onGround) {
-        friction = 0.1f;
-        speed = 0.5f;
-    }
-    controls.Refresh();
-    if (controls.left && player.physics.velocity.x > -xSpeedCap) {
-        if (player.physics.velocity.x > 0 && player.animation.flipped != false) {
-            player.animation.Reset();
-        }
-        player.physics.velocity.x -= speed;
-        player.animation.flipped = false;
-    }
-    if (controls.right && player.physics.velocity.x < xSpeedCap) {
-        if (player.physics.velocity.x < 0 && player.animation.flipped != true) {
-            player.animation.Reset();
-        }
-        player.physics.velocity.x += speed;
-
-        player.animation.flipped = true;
-
-    }
-
-    //psuedo friction for the player.
-    if (!controls.right && !controls.left) {
-        if(std::abs(player.physics.velocity.x) < 0.55f) {
-            player.physics.velocity.x = 0;
-        }
-        else if (player.physics.velocity.x > 0) {
-            player.physics.velocity.x -= friction;
-        }
-        else if (player.physics.velocity.x < 0) {
-            player.physics.velocity.x += friction;
-        }
-    }
-    if (controls.jump && player.onGround) {
-        PlayerJump(player);
-    }
-    //If you hold space while jumping you should have a longer arc.
-    if (controls.jump && player.physics.velocity.y < 0) {
-        player.physics.gravityRatio = 0.3f;
-    }
-    else {
-        player.physics.gravityRatio = 1.0f;
-    }
-    player.animation.framerate = std::abs((player.physics.velocity.x)) * 2;
 }
 
 /// <summary>
@@ -183,22 +106,18 @@ GameObject Fire(GameObject weapon, sf::Vector2f crosshairPosNormalized, float sp
 
 int main()
 {
+    Player player = Player(sf::Vector2f(50,50));
     bool close = false;
     std::string crosshair = "images/crosshair.png";
     std::string ak47 = "images/weapons/ak47.png";
-    std::string playerWalk = "animations/playerWalk/playerWalkSheet.png";
+
     std::string bullet = "images/bullets/bullet-basic.png";
     sf::Texture bulletText;
-    sf::Texture playerWalkImage;
+    
     sf::Texture crosshairText;
     sf::Texture ak47Text;
     sf::Mouse mouse;
-    if (playerWalkImage.loadFromFile(playerWalk)) {
-        std::cout << "player walk image loaded" << std::endl;
-    }
-    else {
-        std::cout << "player walk image not loaded" << std::endl;
-    }
+
     if (crosshairText.loadFromFile(crosshair)) {
         std::cout << "Crosshair loaded successfully." << std::endl;
     }
@@ -212,7 +131,7 @@ int main()
         std::cout << "Weapon not loaded!!" << std::endl;
     }
 
-    playerWalkImage.setSmooth(true);
+    
     crosshairText.setSmooth(true);
     ak47Text.setSmooth(true);
 
@@ -237,10 +156,7 @@ int main()
     weaponObj.physics.enabled = false;
     weaponObj.physics.collisionsEnabled = false;
     weaponObj.debugDraw = false;
-    GameObject player(Box2D(sf::Vector2f(100, 100), sf::Vector2f(50, 100)), "Player", 2, Physics2D(sf::Vector2f(50 + 5, 100 + 5)));
-    player.animation = Animation(playerWalkImage, 4);
-    player.animation.framerate = 60;
-    player.debugDraw = false;
+
     gameObjects.push_back(&player);
     gameObjects.push_back(&crosshairObj);
     gameObjects.push_back(&weaponObj);
@@ -281,10 +197,7 @@ int main()
                 //Add entities to gameObjects.
 
 				if (clock.getElapsedTime().asMilliseconds() > convertedFramerate) {
-
-
                     if (mouse.isButtonPressed(sf::Mouse::Button::Left)) {
-                        //Dunno another way to do this wow :))
                         std::vector<GameObject*> currentRef;
                         for (int i = 0; i < entityObjectStorage.size(); i++) {
                             currentRef.push_back(&entityObjectStorage[i]);
@@ -304,11 +217,11 @@ int main()
                         //gameObjects.push_back(&entityObjectStorage.back());
                     }
                     //remove all objects found in entityObjectStorage from gameObjects DUE TO the vector changing position in memory when adding a new object.
-                    player.onGround = OnGround(player, gameObjects);
-					PlayerMovement(player, p1Controls);
+                    player.onGround = Utils::OnGround(player, gameObjects);
+                    p1Controls.Refresh();
+                    player.PlayerMovement(p1Controls);
 					gameObjects = world.Update(gameObjects);
 					//sets camera position to center of the window.
-					//get movement from camera and add it to the crosshair.
 
 					cam.SetPos(player.box2d.position - sf::Vector2f((window.getSize().x) / 2 - player.box2d.size.x / 2, (window.getSize().y) / 2 - player.box2d.size.y / 2));
                     gameObjects = Draw::SortByLayer(gameObjects);

@@ -162,7 +162,9 @@
     <ClCompile Include="Movement.cpp" />
     <ClCompile Include="Physics2D.cpp" />
     <ClCompile Include="PhysicsWorld.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Score.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
@@ -175,7 +177,9 @@
     <ClInclude Include="Movement.h" />
     <ClInclude Include="Physics2D.h" />
     <ClInclude Include="PhysicsWorld.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Score.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
