@@ -71,9 +71,9 @@ float LookAt(sf::Vector2f looking, sf::Vector2f lookingAt, float offset) {
 
     return angleDegrees;
 }
-sf::Vector2f fireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
+sf::Vector2f FireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
     sf::Vector2f direction = dir1 - dir2;
-    //divide by distance of both objects to normalize
+    //divide by distance of both objects to normalize to 1
     float absSum = abs(direction.x) + std::abs(direction.y);
     if (absSum != 0) {
         return sf::Vector2f(direction.x / absSum, direction.y / absSum);
@@ -86,7 +86,7 @@ sf::Vector2f fireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
 /// Shoots a bullet game object from 
 /// </summary>
 /// <param name="weapon"></param>
-GameObject Fire(GameObject weapon, sf::Vector2f crosshairPosNormalized, float speed) {
+GameObject Fire(GameObject weapon, sf::Vector2f fireDirection, float speed) {
     std::string bulletString = "images/bullets/bullet-basic.png";
     sf::Texture bulletText;
     bulletText.loadFromFile(bulletString);
@@ -97,7 +97,7 @@ GameObject Fire(GameObject weapon, sf::Vector2f crosshairPosNormalized, float sp
     bullet.physics.collisionsEnabled = false;
     bullet.physics.gravityRatio = 0;
     bullet.debugDraw = false;
-    bullet.physics.velocity = fireDirection(crosshairPosNormalized, weapon.box2d.position);
+    bullet.physics.velocity = fireDirection; // (crosshairPosNormalized, weapon.box2d.position);
     bullet.physics.velocity = sf::Vector2f(bullet.physics.velocity.x * speed, bullet.physics.velocity.y * speed);
     return bullet;
 }
