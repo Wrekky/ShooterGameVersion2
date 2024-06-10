@@ -1,15 +1,11 @@
 #include "Player.h"
 #include "Utils.h"
 #include <iostream>
+
 Player::Player(sf::Vector2f position) {
     std::string playerWalk = "animations/playerWalk/playerWalkSheet.png";
     sf::Texture playerWalkImage;
-    if (playerWalkImage.loadFromFile(playerWalk)) {
-        std::cout << "player walk image loaded" << std::endl;
-    }
-    else {
-        std::cout << "player walk image not loaded" << std::endl;
-    }
+    playerWalkImage.loadFromFile(playerWalk);
     playerWalkImage.setSmooth(true);
     this->box2d = Box2D(position, sf::Vector2f(50, 100));
     this->type = "Player";
@@ -19,9 +15,11 @@ Player::Player(sf::Vector2f position) {
     this->animation.framerate = 60;
     this->debugDraw = false;
 }
+
 void Player::PlayerJump() {
 	physics.velocity.y = -10;
 }
+
 void Player::PlayerMovement(Controls controls) {
 	float setSpeed = speed;
 	float setFriction = friction;
@@ -45,7 +43,6 @@ void Player::PlayerMovement(Controls controls) {
         animation.flipped = true;
     }
 
-    //psuedo friction for the 
     if (!controls.right && !controls.left) {
         if (std::abs(physics.velocity.x) < 0.55f) {
             physics.velocity.x = 0;
@@ -60,6 +57,7 @@ void Player::PlayerMovement(Controls controls) {
     if (controls.jump && onGround) {
         PlayerJump();
     }
+
     //If you hold space while jumping you should have a longer arc.
     if (controls.jump && physics.velocity.y < 0) {
         physics.gravityRatio = 0.3f;
@@ -68,4 +66,27 @@ void Player::PlayerMovement(Controls controls) {
         physics.gravityRatio = 1.0f;
     }
     animation.framerate = std::abs((physics.velocity.x)) * 2;
+}
+
+
+Bullet Fire (GameObject weapon, sf::Vector2f fireDirection) {
+
+    if (weapon.type == "ak47") {
+        std::string bulletString = "images/bullets/bullet-basic.png";
+        sf::Texture bulletText;
+        bulletText.loadFromFile(bulletString);
+        bulletText.setSmooth(true);
+        GameObject bulletGameObject(Box2D(weapon.box2d.position, sf::Vector2f(10, 10)), "bullet", 3);
+        Bullet bullet;
+        bullet.animation = Animation(bulletText, 1);
+    }
+
+
+    bullet.physics.enabled = true;
+    bullet.physics.collisionsEnabled = false;
+    bullet.physics.gravityRatio = 0;
+    bullet.debugDraw = false;
+    bullet.physics.velocity = fireDirection;
+    bullet.physics.velocity = sf::Vector2f(bullet.physics.velocity.x * speed, bullet.physics.velocity.y * speed);
+    return bullet;
 }

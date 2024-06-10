@@ -14,3 +14,15 @@ static bool OnGround(GameObject obj, std::vector<GameObject*> objects) {
     }
     return false;
 }
+
+sf::Vector2f FireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
+    sf::Vector2f direction = dir1 - dir2;
+    //divide by distance of both objects to normalize to 1
+    float absSum = abs(direction.x) + std::abs(direction.y);
+    if (absSum != 0) {
+        return sf::Vector2f(direction.x / absSum, direction.y / absSum);
+    }
+    else {
+        return sf::Vector2f(1, 0);
+    }
+}
