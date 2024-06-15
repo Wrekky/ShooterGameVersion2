@@ -1,6 +1,6 @@
 #include "Utils.h"
 #include "Collision.h"
-static bool OnGround(GameObject obj, std::vector<GameObject*> objects) {
+bool Utils::OnGround(GameObject obj, std::vector<GameObject*> objects) {
     Box2D box;
     box = obj.box2d;
     box.position = sf::Vector2f(box.position.x + 1, box.position.y + box.size.y + 1);
@@ -15,7 +15,7 @@ static bool OnGround(GameObject obj, std::vector<GameObject*> objects) {
     return false;
 }
 
-sf::Vector2f FireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
+sf::Vector2f Utils::FireDirection(sf::Vector2f dir1, sf::Vector2f dir2) {
     sf::Vector2f direction = dir1 - dir2;
     //divide by distance of both objects to normalize to 1
     float absSum = abs(direction.x) + std::abs(direction.y);

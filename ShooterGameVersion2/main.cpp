@@ -1,9 +1,9 @@
-
 #define _USE_MATH_DEFINES
 #include <SFML/Graphics.hpp>
 #include "Controls.h"
 #include "Collision.h"
 #include "GameObject.h"
+#include "Bullet.h"
 #include <iostream>
 #include "Draw.h"
 #include "PhysicsWorld.h"
@@ -70,25 +70,6 @@ float LookAt(sf::Vector2f looking, sf::Vector2f lookingAt, float offset) {
     angleDegrees + offset;
 
     return angleDegrees;
-}
-/// <summary>
-/// Shoots a bullet game object from 
-/// </summary>
-/// <param name="weapon"></param>
-GameObject Fire(GameObject weapon, sf::Vector2f fireDirection, float speed) {
-    std::string bulletString = "images/bullets/bullet-basic.png";
-    sf::Texture bulletText;
-    bulletText.loadFromFile(bulletString);
-    bulletText.setSmooth(true);
-    GameObject bullet(Box2D(weapon.box2d.position, sf::Vector2f(10, 10)), "bullet", 3);
-    bullet.animation = Animation(bulletText, 1);
-    bullet.physics.enabled = true;
-    bullet.physics.collisionsEnabled = false;
-    bullet.physics.gravityRatio = 0;
-    bullet.debugDraw = false;
-    bullet.physics.velocity = fireDirection;
-    bullet.physics.velocity = sf::Vector2f(bullet.physics.velocity.x * speed, bullet.physics.velocity.y * speed);
-    return bullet;
 }
 
 
@@ -191,7 +172,8 @@ int main()
                         for (int i = 0; i < entityObjectStorage.size(); i++) {
                             currentRef.push_back(&entityObjectStorage[i]);
                         }
-                        entityObjectStorage.push_back(Fire(weaponObj, crosshairObj.box2d.position + cam.GetPos(), 10));
+                        
+                        entityObjectStorage.push_back(player.Fire(weaponObj, crosshairObj.box2d.position + cam.GetPos()));
                         //remove all previous references for entities from gameObjects list.
                         for (int i = 0; i < currentRef.size(); i++) {
                             for (int x = 0; x < gameObjects.size(); x++) {

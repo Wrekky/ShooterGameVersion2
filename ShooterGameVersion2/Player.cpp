@@ -69,24 +69,23 @@ void Player::PlayerMovement(Controls controls) {
 }
 
 
-Bullet Fire (GameObject weapon, sf::Vector2f fireDirection) {
-
+Bullet Player::Fire (GameObject weapon, sf::Vector2f crosshairPosWorld) {
+    sf::Vector2f fireDirection = Utils::FireDirection(crosshairPosWorld, weapon.box2d.position);
+    GameObject bulletGameObject(Box2D(weapon.box2d.position, sf::Vector2f(10, 10)), "bullet", 3);
+    Bullet bullet(bulletGameObject);
     if (weapon.type == "ak47") {
         std::string bulletString = "images/bullets/bullet-basic.png";
         sf::Texture bulletText;
         bulletText.loadFromFile(bulletString);
         bulletText.setSmooth(true);
-        GameObject bulletGameObject(Box2D(weapon.box2d.position, sf::Vector2f(10, 10)), "bullet", 3);
-        Bullet bullet;
         bullet.animation = Animation(bulletText, 1);
+        bullet.physics.enabled = true;
+        bullet.physics.collisionsEnabled = false;
+        bullet.physics.gravityRatio = 0;
+        bullet.debugDraw = false;
+        bullet.physics.velocity = fireDirection;
+        bullet.physics.velocity = sf::Vector2f(bullet.physics.velocity.x * bullet.speed, bullet.physics.velocity.y * bullet.speed);
+        bullet.type = "bullet";
     }
-
-
-    bullet.physics.enabled = true;
-    bullet.physics.collisionsEnabled = false;
-    bullet.physics.gravityRatio = 0;
-    bullet.debugDraw = false;
-    bullet.physics.velocity = fireDirection;
-    bullet.physics.velocity = sf::Vector2f(bullet.physics.velocity.x * speed, bullet.physics.velocity.y * speed);
     return bullet;
 }
